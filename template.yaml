@@ -32,6 +32,13 @@ Parameters:
 
   
 Resources:
+
+  CodeRepository:
+    Type: AWS::SageMaker::CodeRepository
+    Properties:
+      GitConfig:
+          RepositoryUrl: https://github.com/aws-samples/bedrock-kb-rag-workshop
+          
   S3Bucket:
     Type: AWS::S3::Bucket
     Description: Creating Amazon S3 bucket to hold source data for knowledge base
@@ -186,6 +193,7 @@ Resources:
       NotebookInstanceName: !Sub ${AWS::StackName}-notebook
       InstanceType: ml.t3.xlarge
       RoleArn: !GetAtt NotebookRole.Arn
+      DefaultCodeRepository: !GetAtt CodeRepository.CodeRepositoryName
 
   NotebookRole:
     Type: AWS::IAM::Role

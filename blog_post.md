@@ -46,8 +46,8 @@ text generation model (Anthropic Claude v2) and the Amazon Bedrock
 Knowledge Base for this solution. The text corpus representing an
 enterprise knowledge base is stored as HTML files in Amazon S3 and is
 ingested in the form of text embeddings into an index in a Amazon
-OpenSearch Services (AOSS) collection using Bedrock knowledge base agent
-in a fully-managed serverless fashion.
+OpenSearch Service Serverless (AOSS) collection using Bedrock knowledge
+base agent in a fully-managed serverless fashion.
 
 We provide an AWS Cloud Formation template to stand up all the resources
 required for building this solution. We then demonstrate how to use
@@ -370,7 +370,7 @@ contains the code to demonstrate this.
         query_embedding = embeddings.embed_query(query)
 
         # query to lookup OpenSearch kNN vector. Can add any metadata fields based filtering
-        # here as part of thisquery.
+        # here as part of this query.
         query_qna = {
             "size": k,
             "query": {
