@@ -156,10 +156,10 @@ currently logged into your AWS account which you’d have to provide. Make
 a note of the OpenSearch Service collection ARN, we use this in
 subsequent steps. **This template takes about 5 minutes to complete**.
 
-|       AWS Region        |                                                                                                                                   Link                                                                                                                                    |
-|:-----------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| us-east-1 (N. Virginia) | [<img src="./img/ML-14328-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15539/template.yaml) |
-|   us-west-2 (Oregon)    | [<img src="./img/ML-14328-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15539/template.yaml) |
+|       AWS Region        |                                                                                                                                   Link                                                                                                                                   |
+|:-----------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| us-east-1 (N. Virginia) | [<img src="./img/ML-14328-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
+|   us-west-2 (Oregon)    | [<img src="./img/ML-14328-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
 
 After the stack is created successfully, navigate to the stack’s
 `Outputs` tab on the AWS CloudFormation console and note the values for

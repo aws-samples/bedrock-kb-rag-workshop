@@ -1,0 +1,304 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Amazon OpenSearch Serverless template to create an IAM user, encryption policy, data access policy and collection'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Required Parameters
+        Parameters:
+          - BedrockNotebookName
+    ParameterLabels:      
+      BedrockNotebookName:
+        default: Name of SageMaker Notebook Instance
+      
+Parameters:
+  IAMUserArn:
+    AllowedPattern: "^arn:aws:iam::\\d{12}:user/[\\w+=,.@-]+|arn:aws:sts::\\d{12}:assumed-role/[\\w+=,.@-]+/[\\w+=,.@-]+$"
+    Description: The Arn of the IAM user running this CloudFormation template
+    Type: String
+  AOSSCollectionName:
+    Default: sagemaker-kb
+    Type: String
+    Description: Name of the Amazon OpenSearch Service Serverless (AOSS) collection.
+    MinLength: 1
+    MaxLength: 21
+    AllowedPattern: ^[a-z0-9](-*[a-z0-9])*
+    ConstraintDescription: Must be lowercase or numbers with a length of 1-63 characters.
+  AOSSIndexName:
+    Default: sagemaker-readthedocs-io
+    Type: String
+    Description: Name of the vector index in the Amazon OpenSearch Service Serverless (AOSS) collection.
+
+  
+Resources:
+
+  CodeRepository:
+    Type: AWS::SageMaker::CodeRepository
+    Properties:
+      GitConfig:
+          RepositoryUrl: https://github.com/aws-samples/bedrock-kb-rag-workshop
+          
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Description: Creating Amazon S3 bucket to hold source data for knowledge base
+    Properties:
+      BucketName: !Join
+      - '-'
+      - - !Ref AOSSCollectionName
+        - !Sub ${AWS::AccountId}
+
+  CustomSGResource:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt 'CustomFunctionCopyContentsToS3Bucket.Arn'
+
+
+  LambdaBasicExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource: '*'
+
+  
+  CustomFunctionCopyContentsToS3Bucket:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.lambda_handler
+      Description: "Copies files from the Blog bucket to bucket in this account"
+      Timeout: 30
+      Role: !GetAtt 'LambdaBasicExecutionRole.Arn'
+      Runtime: python3.9
+      Environment:
+        Variables:
+          AOSS_COLLECTION_NAME: !Ref AOSSCollectionName
+      Code:
+        ZipFile: |
+          import os
+          import json
+          import boto3
+          import logging
+          import cfnresponse
+          
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+          DATA_BUCKET = "aws-blogs-artifacts-public" 
+          SRC_PREFIX = "artifacts/ML-15729/docs"
+          DST_PREFIX = "docs"
+          MANIFEST = os.path.join(SRC_PREFIX, "manifest.txt")
+          # s3://aws-blogs-artifacts-public/artifacts/ML-15729/docs/manifest.txt
+          def lambda_handler(event, context):
+            logger.info('got event {}'.format(event))
+            try:
+              s3 = boto3.client('s3')
+              obj = s3.get_object(Bucket=DATA_BUCKET, Key=MANIFEST)
+              manifest_data = obj['Body'].iter_lines()
+              ctr = 0
+              for f in manifest_data:
+                fname = f.decode()                
+                key = os.path.join(SRC_PREFIX, fname)
+                logger.info(f"going to read {key} from bucket={DATA_BUCKET}")
+                copy_source = { 'Bucket': DATA_BUCKET, 'Key': key }
+                account_id = boto3.client('sts').get_caller_identity().get('Account')
+                bucket = boto3.resource('s3').Bucket(f"{os.environ.get('AOSS_COLLECTION_NAME')}-{account_id}")
+                dst_key = fname
+                logger.info(f"going to copy {copy_source} -> s3://{bucket}/{dst_key}")
+                bucket.copy(copy_source, dst_key)
+                ctr += 1
+              response = dict(files_copied=ctr, error=None)
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
+            except Exception as e:
+              logger.error(e)
+              response = dict(files_copied=0, error=str(e))
+              cfnresponse.send(event, context, cfnresponse.FAILED, response)
+
+            return 
+  
+  AmazonBedrockExecutionRoleForKnowledgeBase:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join
+      - '-'
+      - - AmazonBedrockExecutionRoleForKnowledgeBase
+        - !Ref AOSSCollectionName
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: bedrock.amazonaws.com
+          Action: sts:AssumeRole
+          Condition:
+            StringEquals:
+              "aws:SourceAccount": !Sub "${AWS::AccountId}"
+            ArnLike:
+              "AWS:SourceArn": !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/*"
+      Path: /
+      Policies:
+        - PolicyName: S3ReadOnlyAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:Get*
+                  - s3:List*
+                  - s3:Describe*
+                  - s3-object-lambda:Get*,
+                  - s3-object-lambda:List*
+                Resource: '*'
+        - PolicyName: AOSSAPIAccessAll
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - aoss:APIAccessAll
+                Resource: !Sub arn:aws:aoss:${AWS::Region}:${AWS::AccountId}:collection/*
+        - PolicyName: BedrockListAndInvokeModel
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:ListCustomModels
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/*
+
+  NotebookInstance:
+    Type: AWS::SageMaker::NotebookInstance
+    Properties:
+      NotebookInstanceName: !Sub ${AWS::StackName}-notebook
+      InstanceType: ml.t3.xlarge
+      RoleArn: !GetAtt NotebookRole.Arn
+      DefaultCodeRepository: !GetAtt CodeRepository.CodeRepositoryName
+
+  NotebookRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join
+      - '-'
+      - - !Ref AOSSCollectionName
+        - NoteBookRole
+      Policies:
+        - PolicyName: CustomNotebookAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: BedrockFullAccess
+                Effect: Allow
+                Action:
+                  - "bedrock:*"
+                Resource: "*"
+        - PolicyName: AOSSAPIAccessAll
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - aoss:APIAccessAll
+                Resource: !Sub arn:aws:aoss:${AWS::Region}:${AWS::AccountId}:collection/*
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - sagemaker.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+          - Effect: Allow
+            Principal:
+              Service:
+              - bedrock.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+
+  DataAccessPolicy:
+    Type: 'AWS::OpenSearchServerless::AccessPolicy'
+    Properties:
+      Name: !Join
+      - '-'
+      - - !Ref AOSSCollectionName
+        - access-policy
+      Type: data
+      Description: Access policy for AOSS collection
+      Policy: !Sub >-
+        [{"Description":"Access for cfn user","Rules":[{"ResourceType":"index","Resource":["index/*/*"],"Permission":["aoss:*"]},
+        {"ResourceType":"collection","Resource":["collection/quickstart"],"Permission":["aoss:*"]}],
+        "Principal":["${IAMUserArn}", "${AmazonBedrockExecutionRoleForKnowledgeBase.Arn}", "${NotebookRole.Arn}"]}]
+  NetworkPolicy:
+    Type: 'AWS::OpenSearchServerless::SecurityPolicy'
+    Properties:
+      Name: !Join
+      - '-'
+      - - !Ref AOSSCollectionName
+        - network-policy
+      Type: network
+      Description: Network policy for AOSS collection
+      Policy: !Sub >-
+        [{"Rules":[{"ResourceType":"collection","Resource":["collection/${AOSSCollectionName}"]}, {"ResourceType":"dashboard","Resource":["collection/${AOSSCollectionName}"]}],"AllowFromPublic":true}]
+  EncryptionPolicy:
+    Type: 'AWS::OpenSearchServerless::SecurityPolicy'
+    Properties:
+      Name: !Join
+      - '-'
+      - - !Ref AOSSCollectionName
+        - security-policy
+      Type: encryption
+      Description: Encryption policy for AOSS collection
+      Policy: !Sub >-
+        {"Rules":[{"ResourceType":"collection","Resource":["collection/${AOSSCollectionName}"]}],"AWSOwnedKey":true}
+  Collection:
+    Type: 'AWS::OpenSearchServerless::Collection'
+    Properties:
+      Name: !Ref AOSSCollectionName
+      Type: VECTORSEARCH
+      Description: Collection to holds vector search data
+    DependsOn: EncryptionPolicy
+  
+Outputs:
+  S3Bucket:
+    Value: !GetAtt S3Bucket.Arn
+  DashboardURL:
+    Value: !GetAtt Collection.DashboardEndpoint
+  CollectionARN:
+    Value: !GetAtt Collection.Arn
+  FilesCopied:
+    Description: Files copied
+    Value: !GetAtt 'CustomSGResource.files_copied'
+  FileCopyError:
+    Description: Files copy error
+    Value: !GetAtt 'CustomSGResource.error'
+  AOSSVectorIndexName:
+    Description: vector index
+    Value: !Ref AOSSIndexName
+  Region:
+    Description: Deployed Region
+    Value: !Ref AWS::Region
