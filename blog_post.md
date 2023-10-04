@@ -327,7 +327,7 @@ base. The CloudFormation template creates a SageMaker Notebook that
 contains the code to demonstrate this.
 
 1.  Navigate to SageMaker Notebooks and find the notebook named
-    `rag-w-bedrock-kb-notebook` and click on `Open Jupyter Lab`.
+    `bedrock-kb-rag-workshop` and click on `Open Jupyter Lab`.
 
     <figure>
     <img src="img/sm1.jpg" id="fig-rag-w-br-nb"
@@ -336,14 +336,27 @@ contains the code to demonstrate this.
     notebook</figcaption>
     </figure>
 
-2.  When the Jupyter lab opens, click on the
-    `rag_w_bedrock_and_aoss.ipynb` to open the notebook.
+2.  Open a new `Terminal` from `File -> New -> Terminal` and run the
+    following commands to install the Bedrock SDK in a new conda kernel
+    called `bedrock_py39`.
 
-3.  The notebook code demonstrates use of Bedrock, LangChain and
+    ``` python
+    chmod +x /home/ec2-user/SageMaker/bedrock-kb-rag-workshop/setup_bedrock_conda.sh
+    /home/ec2-user/SageMaker/bedrock-kb-rag-workshop/setup_bedrock_conda.sh
+    ```
+
+3.  Wait for one minute after completing the previous step and now click
+    on the `rag_w_bedrock_and_aoss.ipynb` to open the notebook. *Confirm
+    that the notebook is using the newly created `bedrock_py39` kernel,
+    otherwise the code will not work. In case the kernel is not set to
+    `bedrock_py39` then refresh the page and this time the
+    `bedrock_py39` kernel would be selected*.
+
+4.  The notebook code demonstrates use of Bedrock, LangChain and
     opensearch-py packages for implementing the RAG technique for
     question answering.
 
-4.  We access the models available via Bedrock using the `Bedrock` and
+5.  We access the models available via Bedrock using the `Bedrock` and
     `BedrockEmbeddings` classes from the LangChain package.
 
     ``` python
@@ -355,7 +368,7 @@ contains the code to demonstrate this.
     embeddings = BedrockEmbeddings(model_id = "amazon.titan-embed-g1-text-02")
     ```
 
-5.  Interface to AOSS is through the opensearch-py package.
+6.  Interface to AOSS is through the opensearch-py package.
 
     ``` python
     # Functions to talk to OpenSearch
@@ -391,7 +404,7 @@ contains the code to demonstrate this.
         return relevant_documents
     ```
 
-6.  We combine the prompt and the documents retrieved from AOSS as
+7.  We combine the prompt and the documents retrieved from AOSS as
     follows.
 
     ``` python
@@ -411,7 +424,7 @@ contains the code to demonstrate this.
         return context
     ```
 
-7.  Combining everything, the RAG workflow works as shown below.
+8.  Combining everything, the RAG workflow works as shown below.
 
     ``` python
     # 1. Start with the query
@@ -427,7 +440,7 @@ contains the code to demonstrate this.
     response = claude_llm(prompt)
     ```
 
-8.  Here is an example of a sample question answered first with just the
+9.  Here is an example of a sample question answered first with just the
     question in the prompt i.e. without providing any additional
     context. The answer without context is inaccurate.
 
@@ -438,7 +451,7 @@ contains the code to demonstrate this.
     alone</figcaption>
     </figure>
 
-9.  We then ask the same question but this time with the additional
+10. We then ask the same question but this time with the additional
     context retrieved from the knowledge base included in the prompt.
     Now the inaccuracy in the earlier response is addressed and we also
     have attribution as to the source of this answer (notice the

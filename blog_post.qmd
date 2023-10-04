@@ -162,11 +162,18 @@ Once the Bedrock knowledge base is created we are now ready to sync the data (ra
 
 Now we are all set to ask some questions off our newly created knowledge base. The CloudFormation template creates a SageMaker Notebook that contains the code to demonstrate this. 
 
-1. Navigate to SageMaker Notebooks and find the notebook named `rag-w-bedrock-kb-notebook` and click on `Open Jupyter Lab`.
+1. Navigate to SageMaker Notebooks and find the notebook named `bedrock-kb-rag-workshop` and click on `Open Jupyter Lab`.
 
     ![RAG with Bedrock KB notebook](img/sm1.jpg){#fig-rag-w-br-nb}
 
-1. When the Jupyter lab opens, click on the `rag_w_bedrock_and_aoss.ipynb` to open the notebook.
+1. Open a new `Terminal` from `File -> New -> Terminal` and run the following commands to install the Bedrock SDK in a new conda kernel called `bedrock_py39`.
+
+    ```{.python}
+    chmod +x /home/ec2-user/SageMaker/bedrock-kb-rag-workshop/setup_bedrock_conda.sh
+    /home/ec2-user/SageMaker/bedrock-kb-rag-workshop/setup_bedrock_conda.sh
+    ```
+
+1. Wait for one minute after completing the previous step and now click on the `rag_w_bedrock_and_aoss.ipynb` to open the notebook. *Confirm that the notebook is using the newly created `bedrock_py39` kernel, otherwise the code will not work. In case the kernel is not set to `bedrock_py39` then refresh the page and this time the `bedrock_py39` kernel would be selected*.
 
 1. The notebook code demonstrates use of Bedrock, LangChain and opensearch-py packages for implementing the RAG technique for question answering.
 
