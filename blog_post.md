@@ -5,6 +5,8 @@ and LangChain
 
 *Amit Arora*
 
+<img src="./img/blog_post.png" style="width:20.0%" />
+
 One of the most common applications of generative AI and large language
 models (LLMs) in an enterprise environment is answering questions based
 on the enterprise’s knowledge corpus. [Amazon

@@ -15,7 +15,7 @@ Metadata:
 Parameters:
   IAMUserArn:
     AllowedPattern: "^arn:aws:iam::\\d{12}:user/[\\w+=,.@-]+|arn:aws:sts::\\d{12}:assumed-role/[\\w+=,.@-]+/[\\w+=,.@-]+$"
-    Description: The Arn of the IAM user running this CloudFormation template
+    Description: The Arn of the IAM user (or assumed role) running this CloudFormation template.
     Type: String
   AOSSCollectionName:
     Default: sagemaker-kb
@@ -103,7 +103,7 @@ Resources:
           logger = logging.getLogger()
           logger.setLevel(logging.INFO)
           DATA_BUCKET = "aws-blogs-artifacts-public" 
-          SRC_PREFIX = "artifacts/ML-15729/docs"
+          SRC_PREFIX = "artifacts/ML-15729"
           DST_PREFIX = "docs"
           MANIFEST = os.path.join(SRC_PREFIX, "manifest.txt")
           # s3://aws-blogs-artifacts-public/artifacts/ML-15729/docs/manifest.txt
