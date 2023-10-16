@@ -5,7 +5,7 @@ and LangChain
 
 *Amit Arora*
 
-<img src="./img/blog_post.png" style="width:20.0%" />
+<img src="./img/ML-15729-blog_post.png" style="width:20.0%" />
 
 One of the most common applications of generative AI and large language
 models (LLMs) in an enterprise environment is answering questions based
@@ -48,14 +48,15 @@ text generation model (Anthropic Claude v2) and the Amazon Bedrock
 Knowledge Base for this solution. The text corpus representing an
 enterprise knowledge base is stored as HTML files in Amazon S3 and is
 ingested in the form of text embeddings into an index in a Amazon
-OpenSearch Service Serverless (AOSS) collection using Bedrock knowledge
-base agent in a fully-managed serverless fashion.
+OpenSearch Service Serverless collection using Bedrock knowledge base
+agent in a fully-managed serverless fashion.
 
 We provide an AWS Cloud Formation template to stand up all the resources
 required for building this solution. We then demonstrate how to use
 [LangChain](https://www.langchain.com) to interface with the Bedrock and
 [opensearch-py](https://pypi.org/project/opensearch-py/) to interface
-with AOSS and build a RAG based question answer workflow.
+with OpenSearch Service Serverless and build a RAG based question answer
+workflow.
 
 ## Solution overview
 
@@ -63,14 +64,15 @@ We use a subset of [SageMaker docs](https://sagemaker.readthedocs.io) as
 the knowledge corpus for this post. The data is available in the form of
 HTML files in an S3 bucket, a Bedrock Knowledge Base Agent then reads
 these files, converts them into smaller chunks, encodes these chunks
-into vectors (embeddings) and then ingests these embeddings into an AOSS
-collection index. We implement the RAG functionality in a notebook, a
-set of SageMaker related questions is asked of the Claude model without
-providing any additional context and then the same questions are asked
-again but this time with context based on similar documents retrieved
-from AOSS i.e. using the RAG approach. We demonstrate the responses
-generated without RAG could be factually inaccurate whereas the RAG
-based responses are accurate and more useful.
+into vectors (embeddings) and then ingests these embeddings into an
+OpenSearch Service Serverless collection index. We implement the RAG
+functionality in a notebook, a set of SageMaker related questions is
+asked of the Claude model without providing any additional context and
+then the same questions are asked again but this time with context based
+on similar documents retrieved from OpenSearch Service Serverless
+i.e. using the RAG approach. We demonstrate the responses generated
+without RAG could be factually inaccurate whereas the RAG based
+responses are accurate and more useful.
 
 All the code for this post is available in the [GitHub
 repo](https://github.com/aws-samples/bedrock-kb-rag/tree/main/blogs/rag).
@@ -79,7 +81,7 @@ The following figure represents the high-level architecture of the
 proposed solution.
 
 <figure>
-<img src="img/bedrock-agents-kb.png" id="fig-architecture"
+<img src="img/ML-15729-bedrock-agents-kb.png" id="fig-architecture"
 alt="Figure 1: Architecture" />
 <figcaption aria-hidden="true">Figure 1: Architecture</figcaption>
 </figure>
@@ -89,7 +91,8 @@ Step-by-step explanation:
 1.  The user provides a question via the Jupyter notebook.
 2.  The question is converted into embedding using Bedrock via the Titan
     embeddings v2 model.
-3.  The embedding is used to find similar documents from an AOSS index.
+3.  The embedding is used to find similar documents from an OpenSearch
+    Service Serverless index.
 4.  The similar documents long with the user question are used to create
     a “prompt”.
 5.  The prompt is provided to Bedrock to generate a response using the
@@ -117,7 +120,7 @@ In terms of open-source packages used in this solution, we use
 [LangChain](https://python.langchain.com/en/latest/index.html) for
 interfacing with Bedrock and
 [opensearch-py](https://pypi.org/project/opensearch-py/) to interface
-with AOSS.
+with OpenSearch Service Serverless.
 
 The workflow for instantiating the solution presented in this post in
 your own AWS account is as follows:
@@ -126,20 +129,22 @@ your own AWS account is as follows:
     account. This will create all the necessary infrastructure resources
     needed for this solution:
 
-    1.  AOSS collection
+    1.  OpenSearch Service Serverless collection
     2.  SageMaker Notebook
     3.  IAM roles
 
-2.  Create a vector index in the AOSS collection. This is done through
-    the AOSS console.
+2.  Create a vector index in the OpenSearch Service Serverless
+    collection. This is done through the OpenSearch Service Serverless
+    console.
 
 3.  Create a knowledge base in Bedrock and synch data from the S3 bucket
-    to the AOSS index. This is done through the Bedrock console.
+    to the OpenSearch Service Serverless collection index. This is done
+    through the Bedrock console.
 
 4.  Run the
     [`rag_w_bedrock_and_aoss.ipynb`](./rag_w_bedrock_and_aoss.ipynb)
     notebook in the SageMaker notebook to ask questions based on the
-    data ingested in AOSS index.
+    data ingested in OpenSearch Service Serverless collection index.
 
 These steps are discussed in detail in the following sections.
 
@@ -160,8 +165,8 @@ subsequent steps. **This template takes about 5 minutes to complete**.
 
 |       AWS Region        |                                                                                                                                   Link                                                                                                                                   |
 |:-----------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| us-east-1 (N. Virginia) | [<img src="./img/ML-14328-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
-|   us-west-2 (Oregon)    | [<img src="./img/ML-14328-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
+| us-east-1 (N. Virginia) | [<img src="./img/ML-15729-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
+|   us-west-2 (Oregon)    | [<img src="./img/ML-15729-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
 
 After the stack is created successfully, navigate to the stack’s
 `Outputs` tab on the AWS CloudFormation console and note the values for
@@ -169,24 +174,24 @@ After the stack is created successfully, navigate to the stack’s
 subsequent steps.
 
 <figure>
-<img src="img/cf-outputs.jpg" id="fig-cfn-outputs"
+<img src="img/ML-15729-cf-outputs.jpg" id="fig-cfn-outputs"
 alt="Figure 2: Cloud Formation Stack Outputs" />
 <figcaption aria-hidden="true">Figure 2: Cloud Formation Stack
 Outputs</figcaption>
 </figure>
 
-#### Create an AOSS vector index
+#### Create an OpenSearch Service Serverless vector index
 
-The CloudFormation stack creates an AOSS collection, the next step is to
-create a vector index. This is done through the AOSS console as
-described below.
+The CloudFormation stack creates an OpenSearch Service Serverless
+collection, the next step is to create a vector index. This is done
+through the OpenSearch Service Serverless console as described below.
 
 1.  Navigate to OpenSearch Service console and click on `Collections`.
     The `sagemaker-kb` collection created by the CloudFormation stack
     will be listed there.
 
     <figure>
-    <img src="img/aoss.jpg" id="fig-aoss-collections"
+    <img src="img/ML-15729-aoss.jpg" id="fig-aoss-collections"
     alt="Figure 3: SageMaker Knowledge Base Collection" />
     <figcaption aria-hidden="true">Figure 3: SageMaker Knowledge Base
     Collection</figcaption>
@@ -196,7 +201,8 @@ described below.
     storing the embeddings from the documents in S3.
 
     <figure>
-    <img src="img/aoss-cv.jpg" id="fig-aoss-collection-vector-index"
+    <img src="img/ML-15729-aoss-cv.jpg"
+    id="fig-aoss-collection-vector-index"
     alt="Figure 4: SageMaker Knowledge Base Vector Index" />
     <figcaption aria-hidden="true">Figure 4: SageMaker Knowledge Base Vector
     Index</figcaption>
@@ -209,7 +215,7 @@ described below.
     to use these same values**.
 
     <figure>
-    <img src="img/aoss1.jpg"
+    <img src="img/ML-15729-aoss1.jpg"
     id="fig-aoss-collection-vector-index-parameters"
     alt="Figure 5: SageMaker Knowledge Base Vector Index Parameters" />
     <figcaption aria-hidden="true">Figure 5: SageMaker Knowledge Base Vector
@@ -219,7 +225,8 @@ described below.
 4.  Once created the vector index is listed as part of the collection.
 
     <figure>
-    <img src="img/aoss2.jpg" id="fig-aoss-collection-vector-index-created"
+    <img src="img/ML-15729-aoss2.jpg"
+    id="fig-aoss-collection-vector-index-created"
     alt="Figure 6: SageMaker Knowledge Base Vector Index Created" />
     <figcaption aria-hidden="true">Figure 6: SageMaker Knowledge Base Vector
     Index Created</figcaption>
@@ -227,14 +234,14 @@ described below.
 
 #### Create a Bedrock knowledge base
 
-Once the AOSS collection and vector index have been created, it is time
-to setup the Bedrock knowledge base.
+Once the OpenSearch Service Serverless collection and vector index have
+been created, it is time to setup the Bedrock knowledge base.
 
 1.  Navigate to the Bedrock Console and click on `Knowledge Base` and
     click on the `Created Knowledge Base` button.
 
     <figure>
-    <img src="img/kb1.jpg" id="fig-br-kb-list"
+    <img src="img/ML-15729-kb1.jpg" id="fig-br-kb-list"
     alt="Figure 7: Bedrock Knowledge Base" />
     <figcaption aria-hidden="true">Figure 7: Bedrock Knowledge
     Base</figcaption>
@@ -244,7 +251,7 @@ to setup the Bedrock knowledge base.
     screenshots below.
 
     <figure>
-    <img src="img/kb2.jpg" id="fig-br-kb-list"
+    <img src="img/ML-15729-kb2.jpg" id="fig-br-kb-list"
     alt="Figure 8: Bedrock Knowledge Base" />
     <figcaption aria-hidden="true">Figure 8: Bedrock Knowledge
     Base</figcaption>
@@ -253,7 +260,7 @@ to setup the Bedrock knowledge base.
 3.  Select the S3 bucket.
 
     <figure>
-    <img src="img/kb4.jpg" id="fig-br-kb-s3-bucket"
+    <img src="img/ML-15729-kb4.jpg" id="fig-br-kb-s3-bucket"
     alt="Figure 9: Bedrock Knowledge Base S3 bucket" />
     <figcaption aria-hidden="true">Figure 9: Bedrock Knowledge Base S3
     bucket</figcaption>
@@ -262,7 +269,7 @@ to setup the Bedrock knowledge base.
 4.  The Titan embeddings model is automatically selected.
 
     <figure>
-    <img src="img/kb5.jpg" id="fig-br-kb-titan"
+    <img src="img/ML-15729-kb5.jpg" id="fig-br-kb-titan"
     alt="Figure 10: Bedrock Knowledge Base embeddings model" />
     <figcaption aria-hidden="true">Figure 10: Bedrock Knowledge Base
     embeddings model</figcaption>
@@ -272,17 +279,17 @@ to setup the Bedrock knowledge base.
     options available.
 
     <figure>
-    <img src="img/kb6.png" id="fig-br-kb-aoss"
-    alt="Figure 11: Bedrock Knowledge Base AOSS" />
+    <img src="img/ML-15729-kb6.png" id="fig-br-kb-aoss"
+    alt="Figure 11: Bedrock Knowledge Base OpenSearch Service Serverless" />
     <figcaption aria-hidden="true">Figure 11: Bedrock Knowledge Base
-    AOSS</figcaption>
+    OpenSearch Service Serverless</figcaption>
     </figure>
 
 6.  Review and create the knowledge base by clicking the
     `Create knowledge base` button.
 
     <figure>
-    <img src="img/kb7.png" id="fig-br-kb-review-and-create"
+    <img src="img/ML-15729-kb7.png" id="fig-br-kb-review-and-create"
     alt="Figure 12: Bedrock Knowledge Base Review &amp; Create" />
     <figcaption aria-hidden="true">Figure 12: Bedrock Knowledge Base Review
     &amp; Create</figcaption>
@@ -291,7 +298,7 @@ to setup the Bedrock knowledge base.
 7.  The knowledge base should be created now.
 
     <figure>
-    <img src="img/kb8.jpg" id="fig-br-kb-create-complete"
+    <img src="img/ML-15729-kb8.jpg" id="fig-br-kb-create-complete"
     alt="Figure 13: Bedrock Knowledge Base create complete" />
     <figcaption aria-hidden="true">Figure 13: Bedrock Knowledge Base create
     complete</figcaption>
@@ -300,14 +307,14 @@ to setup the Bedrock knowledge base.
 ##### Sync the Bedrock knowledge base
 
 Once the Bedrock knowledge base is created we are now ready to sync the
-data (raw documents) in S3 to embeddings in the AOSS collection vector
-index.
+data (raw documents) in S3 to embeddings in the OpenSearch Service
+Serverless collection vector index.
 
 1.  Start the `Sync` by pressing the `Sync` button, the button label
     changes to `Syncing`.
 
     <figure>
-    <img src="img/kb9.jpg" id="fig-br-kb-sync-in-progress"
+    <img src="img/ML-15729-kb9.jpg" id="fig-br-kb-sync-in-progress"
     alt="Figure 14: Bedrock Knowledge Base sync" />
     <figcaption aria-hidden="true">Figure 14: Bedrock Knowledge Base
     sync</figcaption>
@@ -316,7 +323,7 @@ index.
 2.  Once the `Sync` completes the status changes to `Ready`.
 
     <figure>
-    <img src="img/kb10.jpg" id="fig-br-kb-sync-done"
+    <img src="img/ML-15729-kb10.jpg" id="fig-br-kb-sync-done"
     alt="Figure 15: Bedrock Knowledge Base sync completed" />
     <figcaption aria-hidden="true">Figure 15: Bedrock Knowledge Base sync
     completed</figcaption>
@@ -332,7 +339,7 @@ contains the code to demonstrate this.
     `bedrock-kb-rag-workshop` and click on `Open Jupyter Lab`.
 
     <figure>
-    <img src="img/sm1.jpg" id="fig-rag-w-br-nb"
+    <img src="img/ML-15729-sm1.jpg" id="fig-rag-w-br-nb"
     alt="Figure 16: RAG with Bedrock KB notebook" />
     <figcaption aria-hidden="true">Figure 16: RAG with Bedrock KB
     notebook</figcaption>
@@ -370,7 +377,8 @@ contains the code to demonstrate this.
     embeddings = BedrockEmbeddings(model_id = "amazon.titan-embed-g1-text-02")
     ```
 
-6.  Interface to AOSS is through the opensearch-py package.
+6.  Interface to OpenSearch Service Serverless is through the
+    opensearch-py package.
 
     ``` python
     # Functions to talk to OpenSearch
@@ -378,7 +386,7 @@ contains the code to demonstrate this.
     # Define queries for OpenSearch
     def query_docs(query: str, embeddings: BedrockEmbeddings, aoss_client: OpenSearch, index: str, k: int = 3) -> Dict:
         """
-        Convert the query into embedding and then find similar documents from AOSS
+        Convert the query into embedding and then find similar documents from OpenSearch Service Serverless
         """
 
         # embedding
@@ -406,8 +414,8 @@ contains the code to demonstrate this.
         return relevant_documents
     ```
 
-7.  We combine the prompt and the documents retrieved from AOSS as
-    follows.
+7.  We combine the prompt and the documents retrieved from OpenSearch
+    Service Serverless as follows.
 
     ``` python
     def create_context_for_query(q: str, embeddings: BedrockEmbeddings, aoss_client: OpenSearch, vector_index: str) -> str:
@@ -447,7 +455,7 @@ contains the code to demonstrate this.
     context. The answer without context is inaccurate.
 
     <figure>
-    <img src="img/kb11-wo-context.png" id="fig-rag-wo-context"
+    <img src="img/ML-15729-kb11-wo-context.png" id="fig-rag-wo-context"
     alt="Figure 17: Answer with prompt alone" />
     <figcaption aria-hidden="true">Figure 17: Answer with prompt
     alone</figcaption>
@@ -460,7 +468,7 @@ contains the code to demonstrate this.
     underlined text for the filename and the actual answer)!
 
     <figure>
-    <img src="img/kb11-w-context.png" id="fig-answer-w-context"
+    <img src="img/ML-15729-kb11-w-context.png" id="fig-answer-w-context"
     alt="Figure 18: Answer with prompt and context" />
     <figcaption aria-hidden="true">Figure 18: Answer with prompt and
     context</figcaption>
@@ -489,7 +497,7 @@ leave a comment.
 
 ## Author bio
 
-<img style="float: left; margin: 0 10px 0 0;" src="img/ML-14328-Amit.png">Amit
+<img style="float: left; margin: 0 10px 0 0;" src="img/ML-15729-Amit.png">Amit
 Arora is an AI and ML Specialist Architect at Amazon Web Services,
 helping enterprise customers use cloud-based machine learning services
 to rapidly scale their innovations. He is also an adjunct lecturer in
