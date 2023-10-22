@@ -41,15 +41,16 @@ bot with Amazon SageMaker, Amazon OpenSearch Service, Streamlit, and
 LangChain](https://aws.amazon.com/blogs/machine-learning/build-a-powerful-question-answering-bot-with-amazon-sagemaker-amazon-opensearch-service-streamlit-and-langchain/).
 
 In this post we provide a step-by-step guide with all the building
-blocks for creating an enterprise ready RAG application such as a
-question answering solution. We use LLMs available through Amazon
-Bedrock for the embeddings model (Amazon Titan Text Embeddings v2), the
-text generation model (Anthropic Claude v2) and the Amazon Bedrock
-Knowledge Base for this solution. The text corpus representing an
-enterprise knowledge base is stored as HTML files in Amazon S3 and is
-ingested in the form of text embeddings into an index in a Amazon
-OpenSearch Service Serverless collection using Bedrock knowledge base
-agent in a fully-managed serverless fashion.
+blocks for creating a *Low Code No Code* (LCNC) enterprise ready RAG
+application such as a question answering solution. We use LLMs available
+through Amazon Bedrock for the embeddings model (Amazon Titan Text
+Embeddings v2), the text generation model (Anthropic Claude v2), the
+Amazon Bedrock Knowledge Base and Amazon Bedrock Agents for this
+solution. The text corpus representing an enterprise knowledge base is
+stored as HTML files in Amazon S3 and is ingested in the form of text
+embeddings into an index in a Amazon OpenSearch Service Serverless
+collection using Bedrock knowledge base agent in a fully-managed
+serverless fashion.
 
 We provide an AWS Cloud Formation template to stand up all the resources
 required for building this solution. We then demonstrate how to use
@@ -141,7 +142,11 @@ your own AWS account is as follows:
     to the OpenSearch Service Serverless collection index. This is done
     through the Bedrock console.
 
-4.  Run the
+4.  Create a Bedrock Agent and connect it to the knowledge base and use
+    the Agent console for question answering *without having to write
+    any code*.
+
+5.  Run the
     [`rag_w_bedrock_and_aoss.ipynb`](./rag_w_bedrock_and_aoss.ipynb)
     notebook in the SageMaker notebook to ask questions based on the
     data ingested in OpenSearch Service Serverless collection index.
@@ -329,19 +334,96 @@ Serverless collection vector index.
     completed</figcaption>
     </figure>
 
+#### Create a Bedrock Agent for question answering
+
+Now we are all set to ask some questions of our newly created knowledge
+base. In this step we do this in a no code way by creating a Bedrock
+Agent.
+
+1.  Create a new Bedrock agent, call it `sagemaker-qa` and use the
+    `AmazonBedrockExecutionRoleForAgenta_QA` IAM role, this role is
+    created automatically via CloudFormation.
+
+    <figure>
+    <img src="img/ML-15729-agt2-s1-1.png" id="fig-br-agt-create-step1-1"
+    alt="Figure 16: Provide agent details - agent name" />
+    <figcaption aria-hidden="true">Figure 16: Provide agent details - agent
+    name</figcaption>
+    </figure>
+
+    <figure>
+    <img src="img/ML-15729-agt2-s1-2.png" id="fig-br-agt-create-step1-2"
+    alt="Figure 17: Provide agent details - IAM role" />
+    <figcaption aria-hidden="true">Figure 17: Provide agent details - IAM
+    role</figcaption>
+    </figure>
+
+2.  Provide the following as the instructions for the agent:
+    `You are a Q&A agent that politely answers questions from a knowledge base`.
+
+    <figure>
+    <img src="img/ML-15729-agt3-s1.png" id="fig-br-agt-select-model"
+    alt="Figure 18: Select model" />
+    <figcaption aria-hidden="true">Figure 18: Select model</figcaption>
+    </figure>
+
+3.  Click `Next` on the `Add Action groups - optional` page, there are
+    no action groups needed for this agent.
+
+4.  Select the `sagemaker-docs` knowledge base, in the knowledge base
+    instructions for agent field entry
+    `Answer questions about Amazon SageMaker based only on the information contained in the knowledge base`.
+
+    <figure>
+    <img src="img/ML-15729-agt3-s1.png" id="fig-br-agt-add-kb"
+    alt="Figure 19: Add knowledge base" />
+    <figcaption aria-hidden="true">Figure 19: Add knowledge
+    base</figcaption>
+    </figure>
+
+5.  Press the `Create Agent` button on the `Review and create` screen.
+
+    <figure>
+    <img src="img/ML-15729-agt6.png" id="fig-br-agt-review-and-create"
+    alt="Figure 20: Review and create" />
+    <figcaption aria-hidden="true">Figure 20: Review and create</figcaption>
+    </figure>
+
+6.  Once the agent is ready, we can ask questions to our agent using the
+    Agent console.
+
+    <figure>
+    <img src="img/ML-15729-agt7.png" id="fig-br-agt-console"
+    alt="Figure 21: Agent console" />
+    <figcaption aria-hidden="true">Figure 21: Agent console</figcaption>
+    </figure>
+
+7.  We ask the agent some questions such as
+    `What are the XGBoost versions supported in Amazon SageMaker`,
+    notice that we not only get the correct answer but also a link to
+    the source of the answer in terms of the original document stored in
+    S3 that has been used as context to provide this answer!
+
+    <figure>
+    <img src="img/ML-15729-agt1.png" id="fig-br-agt-qna"
+    alt="Figure 22: Q&amp;A with Bedrock Agent" />
+    <figcaption aria-hidden="true">Figure 22: Q&amp;A with Bedrock
+    Agent</figcaption>
+    </figure>
+
 #### Run the RAG notebook
 
-Now we are all set to ask some questions off our newly created knowledge
-base. The CloudFormation template creates a SageMaker Notebook that
-contains the code to demonstrate this.
+Now we will interact with our knowledge base through code. The
+CloudFormation template creates a SageMaker Notebook that contains the
+code to demonstrate this.
 
 1.  Navigate to SageMaker Notebooks and find the notebook named
     `bedrock-kb-rag-workshop` and click on `Open Jupyter Lab`.
 
     <figure>
     <img src="img/ML-15729-sm1.jpg" id="fig-rag-w-br-nb"
-    alt="Figure 16: RAG with Bedrock KB notebook" />
-    <figcaption aria-hidden="true">Figure 16: RAG with Bedrock KB
+    alt="Figure 23: RAG with Bedrock KB notebook" />
+    <figcaption aria-hidden="true">Figure 23: RAG with Bedrock KB
     notebook</figcaption>
     </figure>
 
@@ -456,8 +538,8 @@ contains the code to demonstrate this.
 
     <figure>
     <img src="img/ML-15729-kb11-wo-context.png" id="fig-rag-wo-context"
-    alt="Figure 17: Answer with prompt alone" />
-    <figcaption aria-hidden="true">Figure 17: Answer with prompt
+    alt="Figure 24: Answer with prompt alone" />
+    <figcaption aria-hidden="true">Figure 24: Answer with prompt
     alone</figcaption>
     </figure>
 
@@ -469,8 +551,8 @@ contains the code to demonstrate this.
 
     <figure>
     <img src="img/ML-15729-kb11-w-context.png" id="fig-answer-w-context"
-    alt="Figure 18: Answer with prompt and context" />
-    <figcaption aria-hidden="true">Figure 18: Answer with prompt and
+    alt="Figure 25: Answer with prompt and context" />
+    <figcaption aria-hidden="true">Figure 25: Answer with prompt and
     context</figcaption>
     </figure>
 

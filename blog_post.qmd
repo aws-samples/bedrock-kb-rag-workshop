@@ -27,7 +27,7 @@ One of the most common applications of generative AI and large language models (
 
 A commonly used approach to address this problem is to use a technique called Retrieval Augmented Generation (RAG). In the RAG-based approach we convert the user question into vector embeddings using an LLM and then do a similarity search for these embeddings in a pre-populated vector database holding the embeddings for the enterprise knowledge corpus. A small number of similar documents (typically three) is added as context along with the user question to the "prompt" provided to another LLM and then that LLM generates an answer to the user question using information provided as context in the prompt. RAG models were introduced by [Lewis et al.](https://arxiv.org/abs/2005.11401) in 2020 as a model where parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever. To understand the overall structure of a RAG-based approach, refer to [Build a powerful question answering bot with Amazon SageMaker, Amazon OpenSearch Service, Streamlit, and LangChain](https://aws.amazon.com/blogs/machine-learning/build-a-powerful-question-answering-bot-with-amazon-sagemaker-amazon-opensearch-service-streamlit-and-langchain/).
 
-In this post we provide a step-by-step guide with all the building blocks for creating an enterprise ready RAG application such as a question answering solution. We use LLMs available through Amazon Bedrock for the embeddings model (Amazon Titan Text Embeddings v2), the text generation model (Anthropic Claude v2) and the Amazon Bedrock Knowledge Base for this solution. The text corpus representing an enterprise knowledge base is stored as HTML files in Amazon S3 and is ingested in the form of text embeddings into an index in a Amazon OpenSearch Service Serverless collection using Bedrock knowledge base agent in a fully-managed serverless fashion.
+In this post we provide a step-by-step guide with all the building blocks for creating a _Low Code No Code_ (LCNC) enterprise ready RAG application such as a question answering solution. We use LLMs available through Amazon Bedrock for the embeddings model (Amazon Titan Text Embeddings v2), the text generation model (Anthropic Claude v2), the Amazon Bedrock Knowledge Base and Amazon Bedrock Agents for this solution. The text corpus representing an enterprise knowledge base is stored as HTML files in Amazon S3 and is ingested in the form of text embeddings into an index in a Amazon OpenSearch Service Serverless collection using Bedrock knowledge base agent in a fully-managed serverless fashion.
 
 We provide an AWS Cloud Formation template to stand up all the resources required for building this solution. We then demonstrate how to use [LangChain](https://www.langchain.com) to interface with the Bedrock and [opensearch-py](https://pypi.org/project/opensearch-py/) to interface with OpenSearch Service Serverless and build a RAG based question answer workflow.
 
@@ -71,6 +71,8 @@ The workflow for instantiating the solution presented in this post in your own A
 1. Create a vector index in the OpenSearch Service Serverless collection. This is done through the OpenSearch Service Serverless console.
 
 1. Create a knowledge base in Bedrock and synch data from the S3 bucket to the OpenSearch Service Serverless collection index. This is done through the Bedrock console.
+
+1. Create a Bedrock Agent and connect it to the knowledge base and use the Agent console for question answering _without having to write any code_.
 
 1. Run the [`rag_w_bedrock_and_aoss.ipynb`](./rag_w_bedrock_and_aoss.ipynb) notebook in the SageMaker notebook to ask questions based on the data ingested in OpenSearch Service Serverless collection index.
 
@@ -160,9 +162,42 @@ Once the Bedrock knowledge base is created we are now ready to sync the data (ra
 
     ![Bedrock Knowledge Base sync completed](img/ML-15729-kb10.jpg){#fig-br-kb-sync-done}
 
+#### Create a Bedrock Agent for question answering
+
+Now we are all set to ask some questions of our newly created knowledge base. In this step we do this in a no code way by creating a Bedrock Agent.
+
+1. Create a new Bedrock agent, call it `sagemaker-qa` and use the `AmazonBedrockExecutionRoleForAgenta_QA` IAM role, this role is created automatically via CloudFormation.
+
+    ![Provide agent details - agent name](img/ML-15729-agt2-s1-1.png){#fig-br-agt-create-step1-1}
+
+    ![Provide agent details - IAM role](img/ML-15729-agt2-s1-2.png){#fig-br-agt-create-step1-2}
+
+1. Provide the following as the instructions for the agent: `You are a Q&A agent that politely answers questions from a knowledge base`.
+
+    ![Select model](img/ML-15729-agt3-s1.png){#fig-br-agt-select-model}
+
+1. Click `Next` on the `Add Action groups - optional` page, there are no action groups needed for this agent.
+
+1. Select the `sagemaker-docs` knowledge base, in the knowledge base instructions for agent field entry `Answer questions about Amazon SageMaker based only on the information contained in the knowledge base`.
+
+    ![Add knowledge base](img/ML-15729-agt3-s1.png){#fig-br-agt-add-kb}
+
+1. Press the `Create Agent` button on the `Review and create` screen.
+
+    ![Review and create](img/ML-15729-agt6.png){#fig-br-agt-review-and-create}
+
+1. Once the agent is ready, we can ask questions to our agent using the Agent console.
+
+    ![Agent console](img/ML-15729-agt7.png){#fig-br-agt-console}
+
+1. We ask the agent some questions such as `What are the XGBoost versions supported in Amazon SageMaker`, notice that we not only get the correct answer but also a link to the source of the answer in terms of the original document stored in S3 that has been used as context to provide this answer!
+
+    ![Q&A with Bedrock Agent](img/ML-15729-agt1.png){#fig-br-agt-qna}
+
+
 #### Run the RAG notebook
 
-Now we are all set to ask some questions off our newly created knowledge base. The CloudFormation template creates a SageMaker Notebook that contains the code to demonstrate this. 
+Now we will interact with our knowledge base through code. The CloudFormation template creates a SageMaker Notebook that contains the code to demonstrate this. 
 
 1. Navigate to SageMaker Notebooks and find the notebook named `bedrock-kb-rag-workshop` and click on `Open Jupyter Lab`.
 
