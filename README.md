@@ -21,8 +21,8 @@ Follow the steps listed below to create and run the RAG solution. The [blog_post
 
    |AWS Region                |     Link        |
    |:------------------------:|:-----------:|
-   |us-east-1 (N. Virginia)    | [<img src="./img/ML-14328-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
-   |us-west-2 (Oregon)          | [<img src="./img/ML-14328-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
+   |us-east-1 (N. Virginia)    | [<img src="./img/ML-15729-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
+   |us-west-2 (Oregon)          | [<img src="./img/ML-15729-cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=rag-w-bedrock-kb&templateURL=https://aws-blogs-artifacts-public.s3.amazonaws.com/artifacts/ML-15729/template.yml) |
 
 1. Follow instructions in [Build a RAG based question answer solution using Amazon Bedrock Knowledge Base and Amazon OpenSearch Service Serverless](./blog_post.md)
 
