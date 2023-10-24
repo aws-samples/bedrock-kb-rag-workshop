@@ -10,7 +10,7 @@ The data pipeline represents an undifferentiated heavy lifting and can be implem
 
 Once the data is available in the Bedrock Knowledge Base then a question answering application can be built using the following architectural pattern.
 
-![KB Agent](img/bedrock-agents-kb.png)
+![KB Agent](img/ML-15729-bedrock-agents-kb.png)
 
 ## Installation
 
