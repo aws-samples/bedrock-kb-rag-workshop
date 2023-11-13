@@ -161,8 +161,8 @@ and awareness about LLMs, OpenSearch Service and Bedrock.
 
 Choose **Launch Stack** for the Region you want to deploy resources to.
 All parameters needed by the CloudFormation template have default values
-already filled in, except for ARN of the IAM role with which you are
-currently logged into your AWS account which you’d have to provide. Make
+already filled in, except for **ARN of the IAM role with which you are
+currently logged into your AWS account which you’d have to provide**. Make
 a note of the OpenSearch Service collection ARN, we use this in
 subsequent steps. **This template takes about 5 minutes to complete**.
 
@@ -373,7 +373,7 @@ Agent.
     `Answer questions about Amazon SageMaker based only on the information contained in the knowledge base`.
 
     <figure>
-    <img src="img/ML-15729-agt3-s1.png" id="fig-br-agt-add-kb"
+    <img src="img/ML-15729-agt5-s1.png" id="fig-br-agt-add-kb"
     alt="Figure 19: Add knowledge base" />
     <figcaption aria-hidden="true">Figure 19: Add knowledge
     base</figcaption>
