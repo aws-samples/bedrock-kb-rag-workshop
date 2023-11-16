@@ -1,5 +1,5 @@
 Build a RAG based question answer solution using Amazon Bedrock
-Knowledge Base, Amazon OpenSearch Service Serverless with vector search
+Knowledge Base, vector engine for Amazon OpenSearch Service Serverless
 and LangChain
 ================
 
