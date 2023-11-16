@@ -5,8 +5,8 @@ and LangChain
 
 *Amit Arora*
 
-One of the most common applications of generative AI and large language
-models (LLMs) in an enterprise environment is answering questions based
+One of the most common applications of generative AI and Foundation
+Models (FMs) in an enterprise environment is answering questions based
 on the enterprise’s knowledge corpus. [Amazon
 Lex](https://aws.amazon.com/lex/) provides the framework for building
 [AI based
@@ -23,24 +23,24 @@ are potentially incorrect or inadequate.
 
 A commonly used approach to address this problem is to use a technique
 called Retrieval Augmented Generation (RAG). In the RAG-based approach
-we convert the user question into vector embeddings using an LLM and
-then do a similarity search for these embeddings in a pre-populated
-vector database holding the embeddings for the enterprise knowledge
-corpus. A small number of similar documents (typically three) is added
-as context along with the user question to the “prompt” provided to
-another LLM and then that LLM generates an answer to the user question
-using information provided as context in the prompt. RAG models were
-introduced by [Lewis et al.](https://arxiv.org/abs/2005.11401) in 2020
-as a model where parametric memory is a pre-trained seq2seq model and
-the non-parametric memory is a dense vector index of Wikipedia, accessed
-with a pre-trained neural retriever. To understand the overall structure
-of a RAG-based approach, refer to [Build a powerful question answering
-bot with Amazon SageMaker, Amazon OpenSearch Service, Streamlit, and
+we convert the user question into vector embeddings using an FM and then
+do a similarity search for these embeddings in a pre-populated vector
+database holding the embeddings for the enterprise knowledge corpus. A
+small number of similar documents (typically three) is added as context
+along with the user question to the “prompt” provided to another FM and
+then that FM generates an answer to the user question using information
+provided as context in the prompt. RAG models were introduced by [Lewis
+et al.](https://arxiv.org/abs/2005.11401) in 2020 as a model where
+parametric memory is a pre-trained seq2seq model and the non-parametric
+memory is a dense vector index of Wikipedia, accessed with a pre-trained
+neural retriever. To understand the overall structure of a RAG-based
+approach, refer to [Build a powerful question answering bot with Amazon
+SageMaker, Amazon OpenSearch Service, Streamlit, and
 LangChain](https://aws.amazon.com/blogs/machine-learning/build-a-powerful-question-answering-bot-with-amazon-sagemaker-amazon-opensearch-service-streamlit-and-langchain/).
 
 In this post we provide a step-by-step guide with all the building
 blocks for creating a *Low Code No Code* (LCNC) enterprise ready RAG
-application such as a question answering solution. We use LLMs available
+application such as a question answering solution. We use FMs available
 through Amazon Bedrock for the embeddings model (Amazon Titan Text
 Embeddings v2), the text generation model (Anthropic Claude v2), the
 Amazon Bedrock Knowledge Base and Amazon Bedrock Agents for this
@@ -102,7 +102,7 @@ Step-by-step explanation:
 As illustrated in the architecture diagram, we use the following AWS
 services:
 
-- [Bedrock](https://aws.amazon.com/bedrock/) for access to the LLMs for
+- [Bedrock](https://aws.amazon.com/bedrock/) for access to the FMs for
   embedding and text generation as well as for the knowledge base agent.
 - [OpenSearch Service Serverless with vector
   search](https://aws.amazon.com/opensearch-service/serverless-vector-engine/)
@@ -155,7 +155,7 @@ These steps are discussed in detail in the following sections.
 
 To implement the solution provided in this post, you should have an [AWS
 account](https://signin.aws.amazon.com/signin?redirect_uri=https%3A%2F%2Fportal.aws.amazon.com%2Fbilling%2Fsignup%2Fresume&client_id=signup)
-and awareness about LLMs, OpenSearch Service and Bedrock.
+and awareness about FMs, OpenSearch Service and Bedrock.
 
 #### Use AWS Cloud Formation to create the solution stack
 
@@ -547,7 +547,7 @@ code to demonstrate this.
     # 3. Now create a prompt by combining the query and the context
     prompt = PROMPT_TEMPLATE.format(context, q)
 
-    # 4. Provide the prompt to the LLM to generate an answer to the query based on context provided
+    # 4. Provide the prompt to the FM to generate an answer to the query based on context provided
     response = claude_llm(prompt)
     ```
 
