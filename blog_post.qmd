@@ -82,7 +82,7 @@ To implement the solution provided in this post, you should have an [AWS account
 
 #### Use AWS Cloud Formation to create the solution stack
 
-Choose **Launch Stack** for the Region you want to deploy resources to. All parameters needed by the CloudFormation template have default values already filled in, except for ARN of the IAM role with which you are currently logged into your AWS account which you'd have to provide. Make a note of the OpenSearch Service collection ARN, we use this in subsequent steps. **This template takes about 5 minutes to complete**.
+Choose **Launch Stack** for the Region you want to deploy resources to. All parameters needed by the CloudFormation template have default values already filled in, except for ARN of the IAM role with which you are currently logged into your AWS account which you'd have to provide. Make a note of the OpenSearch Service collection ARN, we use this in subsequent steps. **This template takes about 10 minutes to complete**.
 
    |AWS Region                |     Link        |
    |:------------------------:|:-----------:|
@@ -107,11 +107,11 @@ The CloudFormation stack creates an OpenSearch Service Serverless collection, th
 
 1. Set the vector index name as `sagemaker-readthedocs-io`, vector field name as `vector` dimensions as `1536`, and distance metric as `Euclidean`. **It is required that you set these parameters exactly as mentioned here because the Bedrock Knowledge Base Agent is going to use these same values**.
 
-    ![SageMaker Knowledge Base Vector Index Parameters](img/ML-15729-aoss1.jpg){#fig-aoss-collection-vector-index-parameters}
+    ![SageMaker Knowledge Base Vector Index Parameters](img/ML-15729-os-vi-1.png){#fig-aoss-collection-vector-index-parameters}
 
 1. Once created the vector index is listed as part of the collection.
 
-    ![SageMaker Knowledge Base Vector Index Created](img/ML-15729-aoss2.jpg){#fig-aoss-collection-vector-index-created}
+    ![SageMaker Knowledge Base Vector Index Created](img/ML-15729-os-vi-2.png){#fig-aoss-collection-vector-index-created}
 
 
 #### Create a Bedrock knowledge base
@@ -164,34 +164,39 @@ Once the Bedrock knowledge base is created we are now ready to sync the data (ra
 
 Now we are all set to ask some questions of our newly created knowledge base. In this step we do this in a no code way by creating a Bedrock Agent.
 
-1. Create a new Bedrock agent, call it `sagemaker-qa` and use the `AmazonBedrockExecutionRoleForAgenta_QA` IAM role, this role is created automatically via CloudFormation.
+1. Create a new Bedrock agent, call it `sagemaker-qa` and use the `AmazonBedrockExecutionRoleForAgent_SageMakerQA` IAM role, this role is created automatically via CloudFormation.
 
     ![Provide agent details - agent name](img/ML-15729-agt2-s1-1.png){#fig-br-agt-create-step1-1}
 
-    ![Provide agent details - IAM role](img/ML-15729-agt2-s1-2.png){#fig-br-agt-create-step1-2}
+    ![Provide agent details - IAM role](img/ML-15729-agt-iam.png){#fig-br-agt-create-step1-2}
 
-1. Provide the following as the instructions for the agent: `You are a Q&A agent that politely answers questions from a knowledge base`.
+1. Provide the following as the instructions for the agent: `You are a Q&A agent that politely answers questions from a knowledge base.`. The `Anthropic Claude V2` model is selected as the model for the agent.
 
-    ![Select model](img/ML-15729-agt3-s1.png){#fig-br-agt-select-model}
+    ![Select model](img/ML-15729-agt-select-model.png){#fig-br-agt-select-model}
 
 1. Click `Next` on the `Add Action groups - optional` page, there are no action groups needed for this agent.
 
-1. Select the `sagemaker-docs` knowledge base, in the knowledge base instructions for agent field entry `Answer questions about Amazon SageMaker based only on the information contained in the knowledge base`.
+1. Select the `sagemaker-docs` knowledge base, in the knowledge base instructions for agent field entry `Answer questions about Amazon SageMaker based only on the information contained in the knowledge base.`.
 
-    ![Add knowledge base](img/ML-15729-agt3-s1.png){#fig-br-agt-add-kb}
+    ![Add knowledge base](img/ML-15729-agt5-s1.png){#fig-br-agt-add-kb}
 
-1. Press the `Create Agent` button on the `Review and create` screen.
+1. Click the `Create Agent` button on the `Review and create` screen.
 
     ![Review and create](img/ML-15729-agt6.png){#fig-br-agt-review-and-create}
 
 1. Once the agent is ready, we can ask questions to our agent using the Agent console.
 
-    ![Agent console](img/ML-15729-agt7.png){#fig-br-agt-console}
+    ![Agent console](img/ML-15729-agt-console.png){#fig-br-agt-console}
 
 1. We ask the agent some questions such as `What are the XGBoost versions supported in Amazon SageMaker`, notice that we not only get the correct answer but also a link to the source of the answer in terms of the original document stored in S3 that has been used as context to provide this answer!
 
     ![Q&A with Bedrock Agent](img/ML-15729-agt1.png){#fig-br-agt-qna}
 
+1. The agent also provides a _trace_ feature which can show the steps the agent undertakes to come up with the final answer. The steps include the prompt used and the text from the retrieved documents from the knowledge base. 
+
+    ![Bedrock Agent Trace Step 1](img/ML-15729-agt-trace1.png){#fig-br-agt-trace-step1}
+
+    ![Bedrock Agent Trace Step 2](img/ML-15729-agt-trace2.png){#fig-br-agt-trace-step2}
 
 #### Run the RAG notebook
 

@@ -48,6 +48,53 @@ Resources:
       - - !Ref AOSSCollectionName
         - !Sub ${AWS::AccountId}
 
+  cleanupBucketOnDelete:
+    Type: Custom::cleanupbucket
+    Properties:
+      ServiceToken: !GetAtt 'DeleteS3Bucket.Arn'
+      BucketName: !Ref S3Bucket
+    DependsOn: S3Bucket
+
+  DeleteS3Bucket:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.lambda_handler
+      Description: "Delete all objects in S3 bucket"
+      Timeout: 30
+      Role: !GetAtt 'LambdaBasicExecutionRole.Arn'
+      Runtime: python3.9
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref S3Bucket
+      Code:
+        ZipFile: |
+          import json, boto3, logging
+          import cfnresponse
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def lambda_handler(event, context):
+              logger.info("event: {}".format(event))
+              try:
+                  bucket = event['ResourceProperties']['BucketName']
+                  logger.info("bucket: {}, event['RequestType']: {}".format(bucket,event['RequestType']))
+                  if event['RequestType'] == 'Delete':
+                      s3 = boto3.resource('s3')
+                      bucket = s3.Bucket(bucket)
+                      for obj in bucket.objects.filter():
+                          logger.info("delete obj: {}".format(obj))
+                          s3.Object(bucket.name, obj.key).delete()
+
+                  sendResponseCfn(event, context, cfnresponse.SUCCESS)
+              except Exception as e:
+                  logger.info("Exception: {}".format(e))
+                  sendResponseCfn(event, context, cfnresponse.FAILED)
+
+          def sendResponseCfn(event, context, responseStatus):
+              responseData = {}
+              responseData['Data'] = {}
+              cfnresponse.send(event, context, responseStatus, responseData, "CustomResourcePhysicalID")   
+
   CustomSGResource:
     Type: AWS::CloudFormation::CustomResource
     Properties:
@@ -104,11 +151,15 @@ Resources:
           logger.setLevel(logging.INFO)
           DATA_BUCKET = "aws-blogs-artifacts-public" 
           SRC_PREFIX = "artifacts/ML-15729"
-          DST_PREFIX = "docs"
           MANIFEST = os.path.join(SRC_PREFIX, "manifest.txt")
           # s3://aws-blogs-artifacts-public/artifacts/ML-15729/docs/manifest.txt
           def lambda_handler(event, context):
             logger.info('got event {}'.format(event))
+            if event['RequestType'] == 'Delete':
+              logger.info(f"copy files function called at the time of stack deletion, skipping")
+              response = dict(files_copied=0, error=None)
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
+              return
             try:
               s3 = boto3.client('s3')
               obj = s3.get_object(Bucket=DATA_BUCKET, Key=MANIFEST)
@@ -186,6 +237,19 @@ Resources:
                 Action:
                   - bedrock:InvokeModel
                 Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/*
+
+  AmazonBedrockExecutionRoleForAgentsQA:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AmazonBedrockExecutionRoleForAgents_SageMakerQA
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: bedrock.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
 
   NotebookInstance:
     Type: AWS::SageMaker::NotebookInstance

@@ -161,10 +161,10 @@ and awareness about LLMs, OpenSearch Service and Bedrock.
 
 Choose **Launch Stack** for the Region you want to deploy resources to.
 All parameters needed by the CloudFormation template have default values
-already filled in, except for **ARN of the IAM role with which you are
-currently logged into your AWS account which you’d have to provide**. Make
+already filled in, except for ARN of the IAM role with which you are
+currently logged into your AWS account which you’d have to provide. Make
 a note of the OpenSearch Service collection ARN, we use this in
-subsequent steps. **This template takes about 5 minutes to complete**.
+subsequent steps. **This template takes about 10 minutes to complete**.
 
 |       AWS Region        |                                                                                                                                   Link                                                                                                                                   |
 |:-----------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
@@ -218,7 +218,7 @@ through the OpenSearch Service Serverless console as described below.
     to use these same values**.
 
     <figure>
-    <img src="img/ML-15729-aoss1.jpg"
+    <img src="img/ML-15729-os-vi-1.png"
     id="fig-aoss-collection-vector-index-parameters"
     alt="Figure 5: SageMaker Knowledge Base Vector Index Parameters" />
     <figcaption aria-hidden="true">Figure 5: SageMaker Knowledge Base Vector
@@ -228,7 +228,7 @@ through the OpenSearch Service Serverless console as described below.
 4.  Once created the vector index is listed as part of the collection.
 
     <figure>
-    <img src="img/ML-15729-aoss2.jpg"
+    <img src="img/ML-15729-os-vi-2.png"
     id="fig-aoss-collection-vector-index-created"
     alt="Figure 6: SageMaker Knowledge Base Vector Index Created" />
     <figcaption aria-hidden="true">Figure 6: SageMaker Knowledge Base Vector
@@ -339,8 +339,8 @@ base. In this step we do this in a no code way by creating a Bedrock
 Agent.
 
 1.  Create a new Bedrock agent, call it `sagemaker-qa` and use the
-    `AmazonBedrockExecutionRoleForAgenta_QA` IAM role, this role is
-    created automatically via CloudFormation.
+    `AmazonBedrockExecutionRoleForAgent_SageMakerQA` IAM role, this role
+    is created automatically via CloudFormation.
 
     <figure>
     <img src="img/ML-15729-agt2-s1-1.png" id="fig-br-agt-create-step1-1"
@@ -350,18 +350,20 @@ Agent.
     </figure>
 
     <figure>
-    <img src="img/ML-15729-agt2-s1-2.png" id="fig-br-agt-create-step1-2"
+    <img src="img/ML-15729-agt-iam.png" id="fig-br-agt-create-step1-2"
     alt="Figure 17: Provide agent details - IAM role" />
     <figcaption aria-hidden="true">Figure 17: Provide agent details - IAM
     role</figcaption>
     </figure>
 
 2.  Provide the following as the instructions for the agent:
-    `You are a Q&A agent that politely answers questions from a knowledge base`.
+    `You are a Q&A agent that politely answers questions from a knowledge base.`.
+    The `Anthropic Claude V2` model is selected as the model for the
+    agent.
 
     <figure>
-    <img src="img/ML-15729-agt3-s1.png" id="fig-br-agt-select-model"
-    alt="Figure 18: Select model" />
+    <img src="img/ML-15729-agt-select-model.png"
+    id="fig-br-agt-select-model" alt="Figure 18: Select model" />
     <figcaption aria-hidden="true">Figure 18: Select model</figcaption>
     </figure>
 
@@ -370,7 +372,7 @@ Agent.
 
 4.  Select the `sagemaker-docs` knowledge base, in the knowledge base
     instructions for agent field entry
-    `Answer questions about Amazon SageMaker based only on the information contained in the knowledge base`.
+    `Answer questions about Amazon SageMaker based only on the information contained in the knowledge base.`.
 
     <figure>
     <img src="img/ML-15729-agt5-s1.png" id="fig-br-agt-add-kb"
@@ -379,7 +381,7 @@ Agent.
     base</figcaption>
     </figure>
 
-5.  Press the `Create Agent` button on the `Review and create` screen.
+5.  Click the `Create Agent` button on the `Review and create` screen.
 
     <figure>
     <img src="img/ML-15729-agt6.png" id="fig-br-agt-review-and-create"
@@ -391,7 +393,7 @@ Agent.
     Agent console.
 
     <figure>
-    <img src="img/ML-15729-agt7.png" id="fig-br-agt-console"
+    <img src="img/ML-15729-agt-console.png" id="fig-br-agt-console"
     alt="Figure 21: Agent console" />
     <figcaption aria-hidden="true">Figure 21: Agent console</figcaption>
     </figure>
@@ -409,6 +411,25 @@ Agent.
     Agent</figcaption>
     </figure>
 
+8.  The agent also provides a *trace* feature which can show the steps
+    the agent undertakes to come up with the final answer. The steps
+    include the prompt used and the text from the retrieved documents
+    from the knowledge base.
+
+    <figure>
+    <img src="img/ML-15729-agt-trace1.png" id="fig-br-agt-trace-step1"
+    alt="Figure 23: Bedrock Agent Trace Step 1" />
+    <figcaption aria-hidden="true">Figure 23: Bedrock Agent Trace Step
+    1</figcaption>
+    </figure>
+
+    <figure>
+    <img src="img/ML-15729-agt-trace2.png" id="fig-br-agt-trace-step2"
+    alt="Figure 24: Bedrock Agent Trace Step 2" />
+    <figcaption aria-hidden="true">Figure 24: Bedrock Agent Trace Step
+    2</figcaption>
+    </figure>
+
 #### Run the RAG notebook
 
 Now we will interact with our knowledge base through code. The
@@ -420,8 +441,8 @@ code to demonstrate this.
 
     <figure>
     <img src="img/ML-15729-sm1.jpg" id="fig-rag-w-br-nb"
-    alt="Figure 23: RAG with Bedrock KB notebook" />
-    <figcaption aria-hidden="true">Figure 23: RAG with Bedrock KB
+    alt="Figure 25: RAG with Bedrock KB notebook" />
+    <figcaption aria-hidden="true">Figure 25: RAG with Bedrock KB
     notebook</figcaption>
     </figure>
 
@@ -536,8 +557,8 @@ code to demonstrate this.
 
     <figure>
     <img src="img/ML-15729-kb11-wo-context.png" id="fig-rag-wo-context"
-    alt="Figure 24: Answer with prompt alone" />
-    <figcaption aria-hidden="true">Figure 24: Answer with prompt
+    alt="Figure 26: Answer with prompt alone" />
+    <figcaption aria-hidden="true">Figure 26: Answer with prompt
     alone</figcaption>
     </figure>
 
@@ -549,8 +570,8 @@ code to demonstrate this.
 
     <figure>
     <img src="img/ML-15729-kb11-w-context.png" id="fig-answer-w-context"
-    alt="Figure 25: Answer with prompt and context" />
-    <figcaption aria-hidden="true">Figure 25: Answer with prompt and
+    alt="Figure 27: Answer with prompt and context" />
+    <figcaption aria-hidden="true">Figure 27: Answer with prompt and
     context</figcaption>
     </figure>
 
