@@ -250,6 +250,7 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+        - arn:aws:iam::aws:policy/AmazonBedrockFullAccess
 
   NotebookInstance:
     Type: AWS::SageMaker::NotebookInstance

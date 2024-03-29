@@ -357,7 +357,7 @@ Agent.
     </figure>
 
 2.  Provide the following as the instructions for the agent:
-    `You are a Q&A agent that politely answers questions from a knowledge base.`.
+    `You are a Q&A agent that politely answers questions from a knowledge base named sagemaker-docs.`.
     The `Anthropic Claude V2` model is selected as the model for the
     agent.
 
