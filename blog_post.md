@@ -212,7 +212,7 @@ through the OpenSearch Service Serverless console as described below.
     </figure>
 
 3.  Set the vector index name as `sagemaker-readthedocs-io`, vector
-    field name as `vector` dimensions as `1536`, and distance metric as
+    field name as `vector` dimensions as `1536`, choose  engine types as `FAISS` and distance metric as
     `Euclidean`. **It is required that you set these parameters exactly
     as mentioned here because the Bedrock Knowledge Base Agent is going
     to use these same values**.
