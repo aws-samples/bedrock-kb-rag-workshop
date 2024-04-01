@@ -218,7 +218,7 @@ through the OpenSearch Service Serverless console as described below.
     to use these same values**.
 
     <figure>
-    <img src="img/ML-15729-os-vi-1.png"
+    <img src="img/ML-15729-os-vi-1.1.png"
     id="fig-aoss-collection-vector-index-parameters"
     alt="Figure 5: SageMaker Knowledge Base Vector Index Parameters" />
     <figcaption aria-hidden="true">Figure 5: SageMaker Knowledge Base Vector
@@ -228,7 +228,7 @@ through the OpenSearch Service Serverless console as described below.
 4.  Once created the vector index is listed as part of the collection.
 
     <figure>
-    <img src="img/ML-15729-os-vi-2.png"
+    <img src="img/ML-15729-os-vi-2.1.png"
     id="fig-aoss-collection-vector-index-created"
     alt="Figure 6: SageMaker Knowledge Base Vector Index Created" />
     <figcaption aria-hidden="true">Figure 6: SageMaker Knowledge Base Vector
