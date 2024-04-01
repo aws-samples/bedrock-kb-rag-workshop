@@ -107,11 +107,11 @@ The CloudFormation stack creates an OpenSearch Service Serverless collection, th
 
 1. Set the vector index name as `sagemaker-readthedocs-io`, vector field name as `vector` dimensions as `1536`, and distance metric as `Euclidean`. **It is required that you set these parameters exactly as mentioned here because the Bedrock Knowledge Base Agent is going to use these same values**.
 
-    ![SageMaker Knowledge Base Vector Index Parameters](img/ML-15729-os-vi-1.png){#fig-aoss-collection-vector-index-parameters}
+    ![SageMaker Knowledge Base Vector Index Parameters](img/ML-15729-os-vi-1.1.png){#fig-aoss-collection-vector-index-parameters}
 
 1. Once created the vector index is listed as part of the collection.
 
-    ![SageMaker Knowledge Base Vector Index Created](img/ML-15729-os-vi-2.png){#fig-aoss-collection-vector-index-created}
+    ![SageMaker Knowledge Base Vector Index Created](img/ML-15729-os-vi-2.1.png){#fig-aoss-collection-vector-index-created}
 
 
 #### Create a Bedrock knowledge base
