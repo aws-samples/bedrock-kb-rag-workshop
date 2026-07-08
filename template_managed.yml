@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  Amazon Bedrock Managed Knowledge Base - no external vector store required.
+  Amazon Bedrock manages embedding, storage, and retrieval automatically.
+
+Parameters:
+  S3BucketName:
+    Type: String
+    Description: Name for the S3 bucket that will hold your knowledge base documents.
+    MinLength: 3
+    MaxLength: 63
+    AllowedPattern: ^[a-z0-9][a-z0-9.-]*[a-z0-9]$
+    ConstraintDescription: Must be a valid S3 bucket name (lowercase, numbers, hyphens, periods).
+
+Resources:
+  KnowledgeBaseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3BucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  BedrockKnowledgeBaseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "BedrockKBRole-Managed-${AWS::StackName}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: bedrock.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                "aws:SourceAccount": !Sub "${AWS::AccountId}"
+              ArnLike:
+                "aws:SourceArn": !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/*"
+      Policies:
+        - PolicyName: S3ReadAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt KnowledgeBaseBucket.Arn
+                  - !Sub "${KnowledgeBaseBucket.Arn}/*"
+
+  ManagedKnowledgeBase:
+    Type: AWS::Bedrock::KnowledgeBase
+    Properties:
+      Name: !Sub "managed-kb-${AWS::StackName}"
+      Description: >
+        Managed Knowledge Base - Bedrock handles embedding and vector storage automatically.
+      RoleArn: !GetAtt BedrockKnowledgeBaseRole.Arn
+      KnowledgeBaseConfiguration:
+        Type: "MANAGED"
+    DependsOn: BedrockKnowledgeBaseRole
+
+  KnowledgeBaseDataSource:
+    Type: AWS::Bedrock::DataSource
+    Properties:
+      Name: !Sub "s3-source-${AWS::StackName}"
+      Description: S3 data source for the managed knowledge base
+      KnowledgeBaseId: !GetAtt ManagedKnowledgeBase.KnowledgeBaseId
+      DataSourceConfiguration:
+        Type: "MANAGED_KNOWLEDGE_BASE_CONNECTOR"
+        ManagedKnowledgeBaseConnectorConfiguration:
+          ConnectorParameters:
+            type: "S3"
+            version: "1"
+            connectionConfiguration:
+              bucketName: !Ref S3BucketName
+              bucketOwnerAccountId: !Ref "AWS::AccountId"
+    DependsOn: ManagedKnowledgeBase
+
+Outputs:
+  KnowledgeBaseId:
+    Description: The ID of the Managed Knowledge Base
+    Value: !GetAtt ManagedKnowledgeBase.KnowledgeBaseId
+
+  DataSourceId:
+    Description: The ID of the S3 Data Source
+    Value: !GetAtt KnowledgeBaseDataSource.DataSourceId
+
+  S3BucketArn:
+    Description: ARN of the S3 bucket for knowledge base documents
+    Value: !GetAtt KnowledgeBaseBucket.Arn
+
+  DeploymentNotes:
+    Description: Next steps after deployment
+    Value: >
+      Upload documents to the S3 bucket, then start an ingestion job:
+      aws bedrock-agent start-ingestion-job --knowledge-base-id <KB_ID> --data-source-id <DS_ID>
