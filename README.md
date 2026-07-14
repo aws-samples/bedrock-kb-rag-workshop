@@ -26,6 +26,51 @@ Follow the steps listed below to create and run the RAG solution. The [blog_post
 
 1. Follow instructions in [Build a RAG based question answer solution using Amazon Bedrock Knowledge Base and Amazon OpenSearch Service Serverless](./blog_post.md)
 
+## Managed Knowledge Bases (New)
+
+This workshop was originally built with a **vector knowledge base** using Amazon OpenSearch Serverless. Amazon Bedrock now also supports **Managed Knowledge Bases**, which simplify the setup by eliminating the need for a separate vector store.
+
+With Managed Knowledge Bases:
+- Bedrock handles embedding, storage, and retrieval automatically
+- No OpenSearch Serverless collection required (no minimum OCU costs)
+- Supports agentic retrieval with intelligent query decomposition and managed reranking
+
+A managed knowledge base CloudFormation template is provided at [`template_managed.yml`](./template_managed.yml) as an alternative to the vector-based `template.yml`.
+
+To use managed retrieval in your application code:
+```python
+import boto3
+
+client = boto3.client('bedrock-agent-runtime')
+
+response = client.retrieve(
+    knowledgeBaseId='YOUR_KB_ID',
+    retrievalQuery={'text': 'your question'},
+    retrievalConfiguration={
+        'managedSearchConfiguration': {
+            'numberOfResults': 5
+        }
+    }
+)
+```
+
+> **SDK requirements:** `boto3 >= 1.43` for managed search and agentic retrieval.
+
+### Reranking Options
+
+Managed KBs use a service-managed reranker by default. You can customize this in the `managedSearchConfiguration`:
+- `"rerankingModelType": "MANAGED"` (default) — automatic reranking, no config needed
+- `"rerankingModelType": "NONE"` — disable reranking
+- `"rerankingModelType": "CUSTOM"` — use your own Bedrock reranking model (e.g., Cohere Rerank v3.5)
+
+### Resources
+
+- [Build a Managed Knowledge Base](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-build-managed.html)
+- [Create a Managed Knowledge Base](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-managed-create.html)
+- [Query a Knowledge Base (Retrieve API)](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-test-retrieve.html)
+- [Connect a Data Source (Web Crawler)](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-managed-ds-webcrawler.html)
+- [Agentic Retrieval](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-test-agentic.html)
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
